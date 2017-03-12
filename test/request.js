@@ -22,14 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 var expect = require("chai").expect;
-var session = require("../index.js");
+var request = require("../index.js");
 
 describe("vui-request", function() {
   describe("Request", function() {
     var app = {};
-    session.addRequestToApp(app);
+    request.addRequestToApp(app);
 
-    it("verify Match constructor and getter functions", function() {
+    it("verify Match constructor and getter/setter functions", function() {
       var emptyMatch = new app.Match();
       expect(emptyMatch.getRawText()).to.equal(undefined);
       expect(emptyMatch.getMatchProbability()).to.equal(1.0);
@@ -50,12 +50,25 @@ describe("vui-request", function() {
       expect(typicalMatchWithValues.getMappedValue("NameSlot")).to.equal(undefined);
       expect(typicalMatchWithValues.getLocales()).to.eql(["en"]);
     });
+    it("verify Match clone function", function() {
+      var emptyMatch = new app.Match();
+      var emptyClone = emptyMatch.clone();
+      expect(emptyMatch).to.eql(emptyClone);
+      var typicalMatch = new app.Match("User said blah", 0.9, "BlahIntent", [], ["en"]);
+      var typicalClone = typicalMatch.clone();
+      expect(typicalMatch).to.eql(typicalClone);
+      // Typical with values, using Alexa convetion of naming it "NumberSlot"
+      var typicalMatchWithValues = new app.Match("User said five", 0.9, "UserSaidNumberIntent", [{"key": "NumberSlot", "value": 5}], ["en"]);
+      var typicalCloneWithValues = typicalMatchWithValues.clone();
+      expect(typicalMatchWithValues).to.eql(typicalCloneWithValues);
+    });
+
 
     it("verify Request constructor and getter functions", function() {
       var emptyRequest  = new app.Request();
       expect(emptyRequest.getRequestId()).to.equal(undefined);
       expect(emptyRequest.getRequestType()).to.equal(undefined);
-      expect(emptyRequest.getRequestTimeStampt()).to.equal(undefined);
+      expect(emptyRequest.getRequestTimeStamp()).to.equal(undefined);
       expect(emptyRequest.getRequestLocale()).to.equal(undefined);
       expect(emptyRequest.getRequestMatchCount()).to.equal(0);
       expect(emptyRequest.getRequestMatch(5)).to.equal(undefined);
@@ -63,7 +76,7 @@ describe("vui-request", function() {
       var simpleRequest  = new app.Request("request-123", "START_SESSION", timeStamp, "en", undefined);
       expect(simpleRequest.getRequestId()).to.equal("request-123");
       expect(simpleRequest.getRequestType()).to.equal("START_SESSION");
-      expect(simpleRequest.getRequestTimeStampt()).to.equal(timeStamp);
+      expect(simpleRequest.getRequestTimeStamp()).to.equal(timeStamp);
       expect(simpleRequest.getRequestLocale()).to.equal("en");
       expect(simpleRequest.getRequestMatchCount()).to.equal(0);
       expect(simpleRequest.getRequestMatch(5)).to.equal(undefined);
@@ -72,7 +85,7 @@ describe("vui-request", function() {
       var fullRequest  = new app.Request("request-456", app.Request.type.INTENT, timeStamp, "en", [match1, match2]);
       expect(fullRequest.getRequestId()).to.equal("request-456");
       expect(fullRequest.getRequestType()).to.equal("INTENT");
-      expect(fullRequest.getRequestTimeStampt()).to.equal(timeStamp);
+      expect(fullRequest.getRequestTimeStamp()).to.equal(timeStamp);
       expect(fullRequest.getRequestLocale()).to.equal("en");
       expect(fullRequest.getRequestMatchCount()).to.equal(2);
       expect(fullRequest.getRequestMatch(1)).to.eql({"userRawText":"User said five","matchProbability":0.1,"intentName":"UserSaidNumberIntent","mappedValues":[{"key":"NumberSlot","value":5}],"locales":["en"]});
@@ -80,7 +93,7 @@ describe("vui-request", function() {
       var byeRequest  = new app.Request("request-789", app.Request.type.END_SESSION, timeStamp, "en", [], app.Request.endSessionReason.ERROR, {"type": app.Request.errorCode.INTERNAL_SERVER_ERROR, "message": "Internal server error."});
       expect(byeRequest.getRequestId()).to.equal("request-789");
       expect(byeRequest.getRequestType()).to.equal("END_SESSION");
-      expect(byeRequest.getRequestTimeStampt()).to.equal(timeStamp);
+      expect(byeRequest.getRequestTimeStamp()).to.equal(timeStamp);
       expect(byeRequest.getRequestLocale()).to.equal("en");
       expect(byeRequest.getRequestReason()).to.equal("ERROR");
       expect(byeRequest.getRequestError()).to.eql({"type": app.Request.errorCode.INTERNAL_SERVER_ERROR, "message": "Internal server error."});

@@ -58,19 +58,42 @@ request.Match = class {
   * @param {string} intentName - the name of the intent that the recognizer
   * matched this utterance to, may be empty.
   * @param {Object[]} mappedValues - the list of matched key/value pairs.  This
-  * is called different things on different platforms.  For example, on alex this
+  * is called different things on different platforms.  For example, on alexa this
   * is called slot names/slot values.
   * @param {string[]} locales - an array of locales that should be used to interpret
   * the raw text.  May be an empty array if the recognizer could determine the
   * language
   */
   constructor(requestUserRawText, requestMatchProbability, intentName, mappedValues, locales){
+    this.setRawText(requestUserRawText);
+    this.setMatchProbability(requestMatchProbability);
+    this.setIntentName(intentName);
+    this.setMappedValues(mappedValues);
+    this.setLocales(locales);
+  }
+  clone(){
+    return new request.Match(this.userRawText,
+                             this.matchProbability,
+                             this.intentName,
+                             this.mappedValues,
+                             this.locales
+                           );
+  }
+  getRawText() {
+    return this.userRawText;
+  }
+  setRawText(requestUserRawText){
     if(typeof requestUserRawText == "string"){
       this.userRawText = requestUserRawText;
     }
     else {
       this.userRawText;
     }
+  }
+  getMatchProbability() {
+    return this.matchProbability;
+  }
+  setMatchProbability(requestMatchProbability){
     if(isNaN(requestMatchProbability)){
       this.matchProbability = 1.0;
     }
@@ -85,33 +108,17 @@ request.Match = class {
         this.matchProbability = requestMatchProbability;
       }
     }
+  }
+  getIntentName() {
+    return this.intentName;
+  }
+  setIntentName(intentName){
     if(typeof intentName == "string"){
       this.intentName = intentName;
     }
     else {
       this.intentName;
     }
-    if(typeof mappedValues != "undefined" && Array.isArray(mappedValues)){
-      this.mappedValues = mappedValues.slice();
-    }
-    else {
-      this.mappedValues = [];
-    }
-    if(typeof locales != null && Array.isArray(locales) && locales.length > 0){
-      this.locales = locales.slice();
-    }
-    else {
-      this.locales = [];
-    }
-  }
-  getRawText() {
-    return this.userRawText;
-  }
-  getMatchProbability() {
-    return this.matchProbability;
-  }
-  getIntentName() {
-    return this.intentName;
   }
   getMappedValues() {
     var returnValue = [];
@@ -120,6 +127,20 @@ request.Match = class {
       returnValue.push({"key": scratch.key, "value": scratch.value});
     }
     return returnValue;
+  }
+  setMappedValues(mappedValues){
+    this.mappedValues = [];
+    if(typeof mappedValues != "undefined" && Array.isArray(mappedValues)){
+      for(var i = 0; i < mappedValues.length; i++){
+        var mappedValue = mappedValues[i];
+        if(typeof mappedValue.key == "string" && typeof mappedValue.value != "undefined"){
+          var scratchValue = {};
+          scratchValue.key = mappedValue.key;
+          scratchValue.value = mappedValue.value;
+          this.mappedValues.push(scratchValue);
+        }
+      }
+    }
   }
   getMappedValue(key){
     for(var i = 0; i < this.mappedValues.length; i++){
@@ -133,16 +154,24 @@ request.Match = class {
   getLocales() {
     return this.locales.slice();
   }
-
+  setLocales(locales){
+    if(typeof locales != null && Array.isArray(locales) && locales.length > 0){
+      this.locales = locales.slice();
+    }
+    else {
+      this.locales = [];
+    }
+  }
 };
-
 
 /**
 * This is a constructor for the platform independent request.  It includes
 */
 request.Request = class {
-
-  constructor(requestId, requestType, requestTimeStamp, requestLocale, requestMatches, requestReason, requestError){
+  getRequestId(){
+    return this.requestId;
+  }
+  setRequestId(requestId){
     if(typeof requestId == "string"){
       this.requestId = requestId;
     }
@@ -150,62 +179,36 @@ request.Request = class {
       this.requestId = "" + requestId;
     }
     else {
-      this.requestId;
+      this.requestId = undefined;
     }
+  }
+  getRequestType(){
+    return this.type;
+  }
+  setRequestType(requestType){
     if(request.Request.types.indexOf(requestType) >= 0){
       this.type = requestType;
     }
     else {
-      this.type;
+      this.type = undefined;
     }
-    // TODO Need to decide what the actual format for the time stamp will be, for now just assign it.
+  }
+  getRequestTimeStamp(){
+    return this.timeStamp;
+  }
+  setRequestTimeStamp(requestTimeStamp){
     this.timeStamp = requestTimeStamp;
+  }
+  getRequestLocale(){
+    return this.locale;
+  }
+  setRequestLocale(requestLocale){
     if(typeof requestLocale == "string"){
       this.locale = requestLocale;
     }
     else {
       this.locale;
     }
-    if(Array.isArray(requestMatches)){
-      this.matches = requestMatches;
-    }
-    else {
-      this.matches = [];
-    }
-
-    if(typeof requestReason == "string"){
-      this.reason = requestReason;
-    }
-    else {
-      this.reason;
-    }
-    if(typeof requestError != "undefined" &&
-       (typeof requestError.type == "string" ||
-        typeof requestError.message == "string")){
-      this.error = {};
-      if(typeof requestError.type == "string"){
-        this.error.type = requestError.type;
-      }
-      if(typeof requestError.message == "string"){
-        this.error.message = requestError.message;
-      }
-    }
-    else {
-      this.error;
-    }
-
-  }
-  getRequestId(){
-    return this.requestId;
-  }
-  getRequestType(){
-    return this.type;
-  }
-  getRequestTimeStampt(){
-    return this.timeStamp;
-  }
-  getRequestLocale(){
-    return this.locale;
   }
   getRequestMatchCount(){
     return this.matches.length;
@@ -216,8 +219,25 @@ request.Request = class {
     }
     return;
   }
+  setRequestMatches(replacementMatches){
+    this.matches = [];
+    if(Array.isArray(replacementMatches)){
+      for(var i = 0; i < replacementMatches.length; i++){
+        if(typeof replacementMatches[i].clone == "function")
+        this.matches.push(replacementMatches[i].clone());
+      }
+    }
+  }
   getRequestReason(){
     return this.reason;
+  }
+  setRequestReason(requestReason){
+    if(typeof requestReason == "string"){
+      this.reason = requestReason;
+    }
+    else {
+      this.reason;
+    }
   }
   getRequestError(){
     if(typeof this.error == "undefined"){
@@ -232,6 +252,31 @@ request.Request = class {
       returnValue.message = this.error.message;
     }
     return returnValue;
+  }
+  setRequestError(requestError){
+    if(typeof requestError != "undefined" &&
+       (typeof requestError.type == "string" ||
+        typeof requestError.message == "string")){
+      this.error = {};
+      if(typeof requestError.type == "string"){
+        this.error.type = requestError.type;
+      }
+      if(typeof requestError.message == "string"){
+        this.error.message = requestError.message;
+      }
+    }
+    else {
+      this.error;
+    }
+  }
+  constructor(requestId, requestType, requestTimeStamp, requestLocale, requestMatches, requestReason, requestError){
+    this.setRequestId(requestId);
+    this.setRequestType(requestType);
+    this.setRequestTimeStamp(requestTimeStamp);
+    this.setRequestLocale(requestLocale);
+    this.setRequestMatches(requestMatches);
+    this.setRequestReason(requestReason);
+    this.setRequestError(requestError);
   }
 
 };
