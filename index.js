@@ -245,8 +245,8 @@ request.Request = class {
     }
     var returnValue = {};
     returnValue = {};
-    if(typeof this.error.type == "string"){
-      returnValue.type = this.error.type;
+    if(typeof this.error.code == "string"){
+      returnValue.code = this.error.code;
     }
     if(typeof this.error.message == "string"){
       returnValue.message = this.error.message;
@@ -255,11 +255,11 @@ request.Request = class {
   }
   setRequestError(requestError){
     if(typeof requestError != "undefined" &&
-       (typeof requestError.type == "string" ||
+       (typeof requestError.code == "string" ||
         typeof requestError.message == "string")){
       this.error = {};
-      if(typeof requestError.type == "string"){
-        this.error.type = requestError.type;
+      if(typeof requestError.code == "string"){
+        this.error.code = requestError.code;
       }
       if(typeof requestError.message == "string"){
         this.error.message = requestError.message;
@@ -295,19 +295,27 @@ request.Request.types =
 request.Request.endSessionReason = {};
 request.Request.endSessionReason.USER_INITIATED = "USER_INITIATED";
 request.Request.endSessionReason.ERROR = "ERROR";
+request.Request.endSessionReason.EXCEEDED_MAX_REPROMPTS = "EXCEEDED_MAX_REPROMPTS";
 
 request.Request.endSessionReasons =
 [
   request.Request.endSessionReason.USER_INITIATED,
-  request.Request.endSessionReason.ERROR
+  request.Request.endSessionReason.ERROR,
+  request.Request.endSessionReason.EXCEEDED_MAX_REPROMPTS
 ];
 
 request.Request.errorCode = {};
 request.Request.errorCode.INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
+request.Request.errorCode.INTERNAL_ERROR = "INTERNAL_ERROR";
+request.Request.errorCode.INVALID_RESPONSE = "INVALID_RESPONSE";
+request.Request.errorCode.DEVICE_COMMUNICATION_ERROR = "DEVICE_COMMUNICATION_ERROR";
 
-request.Request.errorCodeS =
+request.Request.errorCodes =
 [
-  request.Request.errorCode.INTERNAL_SERVER_ERROR
+  request.Request.errorCode.INTERNAL_SERVER_ERROR,
+  request.Request.errorCode.INTERNAL_ERROR,
+  request.Request.errorCode.INVALID_RESPONSE,
+  request.Request.errorCode.DEVICE_COMMUNICATION_ERROR
 ];
 
 /**

@@ -90,13 +90,13 @@ describe("vui-request", function() {
       expect(fullRequest.getRequestMatchCount()).to.equal(2);
       expect(fullRequest.getRequestMatch(1)).to.eql({"userRawText":"User said five","matchProbability":0.1,"intentName":"UserSaidNumberIntent","mappedValues":[{"key":"NumberSlot","value":5}],"locales":["en"]});
       expect(fullRequest.getRequestMatch(5)).to.equal(undefined);
-      var byeRequest  = new app.Request("request-789", app.Request.type.END_SESSION, timeStamp, "en", [], app.Request.endSessionReason.ERROR, {"type": app.Request.errorCode.INTERNAL_SERVER_ERROR, "message": "Internal server error."});
+      var byeRequest  = new app.Request("request-789", app.Request.type.END_SESSION, timeStamp, "en", [], app.Request.endSessionReason.ERROR, {"code": app.Request.errorCode.INTERNAL_SERVER_ERROR, "message": "Internal server error."});
       expect(byeRequest.getRequestId()).to.equal("request-789");
       expect(byeRequest.getRequestType()).to.equal("END_SESSION");
       expect(byeRequest.getRequestTimeStamp()).to.equal(timeStamp);
       expect(byeRequest.getRequestLocale()).to.equal("en");
       expect(byeRequest.getRequestReason()).to.equal("ERROR");
-      expect(byeRequest.getRequestError()).to.eql({"type": app.Request.errorCode.INTERNAL_SERVER_ERROR, "message": "Internal server error."});
+      expect(byeRequest.getRequestError()).to.eql({"code": app.Request.errorCode.INTERNAL_SERVER_ERROR, "message": "Internal server error."});
 
     });
 

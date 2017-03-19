@@ -1,6 +1,6 @@
 {
   "name": "vui-request",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "npm module that provides request related functions for inclusion into other vui-xxx projects.",
   "main": "index.js",
   "scripts": {
